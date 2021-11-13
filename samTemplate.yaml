@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: CD Demo Lambda
+Resources:
+  LF1Photos:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      FunctionName: lf1_codepipeline
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./Lambdas/lf1/lambda_function.py
+      Description: "Lambda to search photos"
+      MemorySize: 128
+      Timeout: 3
+      Role: "arn:aws:iam::745682130050:role/service-role/lf1-role-ae27mdoh"
+      Environment:
+        Variables:
+          REGION: us-east-1
+  LF2Photos:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      FunctionName: lf2_codepipeline
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./Lambdas/lf2/lambda_function.py
+      Description: "Lambda to index photos"
+      MemorySize: 128
+      Timeout: 3
+      Role: "arn:aws:iam::745682130050:role/service-role/lf2-role-sa92eebe"
+      Environment:
+        Variables:
+          REGION: us-east-1
