@@ -8,7 +8,7 @@ Resources:
       FunctionName: lf1_codepipeline
       Handler: lambda_function.lambda_handler
       Runtime: python3.7
-      CodeUri: ./Lambdas/lf1/lambda_function.py
+      CodeUri: ./Lambdas/lf1.py
       Description: "Lambda to search photos"
       MemorySize: 128
       Timeout: 3
@@ -22,7 +22,7 @@ Resources:
       FunctionName: lf2_codepipeline
       Handler: lambda_function.lambda_handler
       Runtime: python3.7
-      CodeUri: ./Lambdas/lf2/lambda_function.py
+      CodeUri: ./Lambdas/lf2.py
       Description: "Lambda to index photos"
       MemorySize: 128
       Timeout: 3
