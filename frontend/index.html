@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--Import Google Icon Font-->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoFinder</title>
+  </head>
+
+  <body>
+    <nav>
+      <div class="nav-wrapper container">
+        <a class="brand-logo">PhotoFinder</a>
+      </div>
+    </nav>
+    <div class="container" style="margin-top: 36px">
+      <!-- <h4>Add new image to your gallery</h4> -->
+      <div class="row">
+        <form id="upload-form" class="col s12">
+          <div class="row">
+            <div class="file-field input-field col s5">
+              <!-- <i class="material-icons prefix">add</i> -->
+              <div class="btn">
+                <span>Add a new Image to the Gallery</span>
+                <input
+                  name="image-file"
+                  id="image-file"
+                  type="file"
+                  accept="image/*"
+                />
+              </div>
+              <div class="file-path-wrapper">
+                <input class="file-path validate" type="text" />
+                <span
+                  class="helper-text"
+                  data-error="wrong"
+                  data-success="right"
+                  >eg. "corgi.png"</span
+                >
+              </div>
+            </div>
+            <div class="input-field col s5">
+              <i class="material-icons prefix">tag</i>
+              <input id="tags" name="tags" type="text" class="validate" />
+              <label for="tags"
+                >Tags describing the image (seperated by commas)</label
+              >
+              <span class="helper-text" data-error="wrong" data-success="right"
+                >eg. "dog, beach, ball"</span
+              >
+            </div>
+            <div class="input-field col s2">
+              <button
+                class="btn waves-effect waves-light"
+                type="submit"
+                name="action"
+              >
+                Upload
+                <i class="material-icons right">upload</i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- <hr /> -->
+
+      <!-- <h3>Your Images</h3> -->
+      <div class="row">
+        <form class="col s12" action="javascript:getImages()">
+          <div class="row">
+            <div class="input-field col s9">
+              <i class="material-icons prefix">search</i>
+              <input id="search_query" type="text" class="validate" />
+              <!-- <label for="search_query">What are you looking for?</label> -->
+              <span class="helper-text" data-error="wrong" data-success="right"
+                >eg. "show me photos with trees and birds in them" [hit ENTER to
+                search]</span
+              >
+            </div>
+            <div class="input-field col s2">
+              <button
+                class="btn waves-effect waves-light"
+                type="submit"
+                name="action"
+              >
+                Search
+                <!-- <i class="material-icons right">upload</i> -->
+              </button>
+            </div>
+            <div class="input-field col s1">
+              <button
+                class="btn waves-effect waves-light btn-floating"
+                type="button"
+                name="action"
+                onclick="toggleSearchByVoice()"
+              >
+                <i id="mic-icon" class="material-icons right">mic</i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="image-cards" class="row"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.5.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script
+      type="text/javascript"
+      src="lib/axios/dist/axios.standalone.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/CryptoJS/rollups/hmac-sha256.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/CryptoJS/rollups/sha256.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/CryptoJS/components/hmac.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/CryptoJS/components/enc-base64.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/url-template/url-template.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/apiGatewayCore/sigV4Client.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/apiGatewayCore/apiGatewayClient.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="lib/apiGatewayCore/simpleHttpClient.js"
+    ></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+    <script type="text/javascript" src="apigClient.js"></script>
+
+    <script>
+      var sdk = apigClientFactory.newClient({});
+    </script>
+
+    <script>
+      if (!("webkitSpeechRecognition" in window)) {
+        //Speech API not supported here…
+        console.log("Speech API not supported! :(");
+      } else {
+        //Let’s do some cool stuff :)
+        var recognition = new webkitSpeechRecognition(); //That is the object that will manage our whole recognition process.
+        recognition.continuous = true; //Suitable for dictation.
+        recognition.interimResults = true; //If we want to start receiving results even if they are not final.
+        //Define some more additional parameters for the recognition:
+        recognition.lang = "en-US";
+        recognition.maxAlternatives = 1; //Since from our experience, the highest result is really the best...
+
+        recognition.onstart = function () {
+          //Listening (capturing voice from audio input) started.
+          //This is a good place to give the user visual feedback about that (i.e. flash a red light, etc.)
+        };
+
+        recognition.onend = function () {
+          //Again – give the user feedback that you are not listening anymore. If you wish to achieve continuous recognition – you can write a script to start the recognizer again here.
+        };
+
+        recognition.onresult = function (event) {
+          //the event holds the results
+          //Yay – we have results! Let’s check if they are defined and if final or not:
+          if (typeof event.results === "undefined") {
+            //Something is wrong…
+            toggleSearchByVoice();
+            return;
+          }
+
+          for (var i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              //Final results
+              console.log("final results: " + event.results[i][0].transcript); //Of course – here is the place to do useful things with the results.
+              $("#search_query").val(event.results[i][0].transcript);
+            } else {
+              //i.e. interim...
+              console.log("interim results: " + event.results[i][0].transcript); //You can use these results to give the user near real time experience.
+              $("#search_query").val(event.results[i][0].transcript);
+            }
+          } //end for loop
+        };
+      }
+    </script>
+
+    <script>
+      const uploadImage = () => {};
+
+      $("#upload-form").submit(function (e) {
+        e.preventDefault();
+        const imageFile = $("#image-file")[0].files[0];
+        console.log(imageFile.name);
+
+        sdk
+          .uploadPhotoIdPut(
+            {
+              photo_id: imageFile.name,
+              "Content-Type": imageFile.type,
+              "x-amz-meta-customLabels": $("#tags")
+                .val()
+                .replace(" ", "")
+                .split(","),
+            },
+            imageFile,
+            { "Content-Type": imageFile.type }
+          )
+          .then((resp) => {
+            console.log("response: ", resp);
+            if (resp.status == 200) {
+              alert("Uploaded successfully!");
+            } else {
+              alert("Something went wrong, please try again later.");
+            }
+          })
+          .catch((error) => {
+            console.log("an error occurred", error);
+            alert("Something went wrong, please try again later.");
+          });
+      });
+
+      const showImages = (images) => {
+        images.forEach((img) => {
+          $("#image-cards").append(`
+                <div class="col s12 m6 l3">
+                    <div class="card">
+                        <div style="height: 220px; width: 220px;">
+                            <img src="http://jcs2281-b2.s3-website-us-east-1.amazonaws.com/${img}" style="object-fit: cover" width="220" height="220"/>
+                        </div>
+                    </div>
+                </div>
+            `);
+        });
+      };
+
+      const getImages = () => {
+        $("#image-cards").empty();
+        if ($("#mic-icon").html() === "pause") toggleSearchByVoice();
+        const q = $("#search_query").val().toLowerCase();
+        console.log("Querying", q);
+        const resp = sdk.searchGet({ q: q });
+        resp.then((r) => showImages(r.data.imageNames));
+      };
+
+      const toggleSearchByVoice = () => {
+        if ($("#mic-icon").html() === "pause") {
+          recognition.stop();
+          $("#mic-icon").html("mic");
+          return;
+        }
+
+        console.log("searching by voice...");
+        recognition.start();
+        $("#mic-icon").html("pause");
+      };
+
+      // $(document).ready(() => {
+      // });
+    </script>
+  </body>
+</html>
