@@ -4,3 +4,5 @@ A photo album web application that can be searched using natural language throug
 # Contributors
 Sri Hari Thikkireddy (srt2157@columbia.edu)
 Jainam Chirag Shah (jcs2281@columbia.edu)
+
+![alt text](https://github.com/srt2157/photoAlbum/blob/main/hw2-cloud.png)
