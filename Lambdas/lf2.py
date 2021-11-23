@@ -1,7 +1,7 @@
 import json
 import boto3
 import requests
-#  testing codepipeline
+#  testing
 def getImagenamesFromElastic(keyword):
     data = json.dumps({
         'query': {'match':{'labels': keyword}}
